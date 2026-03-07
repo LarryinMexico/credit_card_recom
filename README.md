@@ -44,6 +44,38 @@ The MCP endpoint will be available at:
 http://127.0.0.1:8000/mcp
 ```
 
+## Use A local stdio bridge for remote MCP hosts
+
+Some MCP hosts do not support remote MCP URLs yet and only accept local
+`command` / `args` servers. For those hosts, run the included bridge and point
+it at your deployed Render URL.
+
+Example host config:
+
+```json
+{
+  "mcpServers": {
+    "credit-card-recom-render": {
+      "command": "env",
+      "args": [
+        "UV_CACHE_DIR=/tmp/uv-cache",
+        "REMOTE_MCP_URL=https://credit-card-recom.onrender.com/mcp",
+        "uv",
+        "run",
+        "--directory",
+        "/Users/weichengchen/credit_card_recom",
+        "--python",
+        "3.12",
+        "credit-card-recommendation-remote-bridge"
+      ]
+    }
+  }
+}
+```
+
+The bridge is a local stdio process, but every tool call is forwarded to the
+remote Render deployment.
+
 ## Inspect with MCP Inspector
 
 ```bash

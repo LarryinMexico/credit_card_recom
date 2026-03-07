@@ -11,6 +11,7 @@ from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
+from credit_card_recom_mcp import remote_bridge
 from credit_card_recom_mcp.server import (
     TOOL_INPUT_SCHEMA,
     TOOL_NAME,
@@ -137,3 +138,60 @@ async def test_streamable_http_transport_exposes_same_tool_behavior() -> None:
     assert payload_from_text["recommendedCard"] == "BusinessTitaniumCard"
     assert payload_from_text["estimatedRewardAmount"] == pytest.approx(3.0)
     assert result.structuredContent == payload_from_text
+
+
+@pytest.mark.asyncio
+async def test_stdio_remote_bridge_forwards_to_streamable_http_server() -> None:
+    """The stdio bridge should expose whatever tools the remote session returns."""
+
+    mirrored_tool = types.Tool(
+        name=TOOL_NAME,
+        description="proxy",
+        inputSchema=TOOL_INPUT_SCHEMA,
+        outputSchema={
+            "type": "object",
+            "properties": {"recommendedCard": {"type": "string"}},
+            "required": ["recommendedCard"],
+        },
+    )
+
+    async def fake_session(_: object) -> list[types.Tool]:
+        return [mirrored_tool]
+
+    original = remote_bridge.with_remote_session
+    remote_bridge.with_remote_session = fake_session  # type: ignore[assignment]
+    try:
+        tools = await remote_bridge.list_tools()
+    finally:
+        remote_bridge.with_remote_session = original  # type: ignore[assignment]
+
+    assert [tool.name for tool in tools] == [TOOL_NAME]
+
+
+@pytest.mark.asyncio
+async def test_stdio_remote_bridge_forwards_call_results() -> None:
+    """The stdio bridge should return the remote tool call result unchanged."""
+
+    expected = types.CallToolResult(
+        content=[types.TextContent(type="text", text='{"recommendedCard":"BusinessTitaniumCard"}')],
+        structuredContent={"recommendedCard": "BusinessTitaniumCard"},
+    )
+
+    async def fake_session(_: object) -> types.CallToolResult:
+        return expected
+
+    original = remote_bridge.with_remote_session
+    remote_bridge.with_remote_session = fake_session  # type: ignore[assignment]
+    try:
+        result = await remote_bridge.call_tool(
+            TOOL_NAME,
+            {
+                "merchantName": "Taipei Water",
+                "transactionAmount": 1000,
+                "transactionType": "taxAndUtility",
+            },
+        )
+    finally:
+        remote_bridge.with_remote_session = original  # type: ignore[assignment]
+
+    assert result == expected

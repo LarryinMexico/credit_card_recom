@@ -17,6 +17,7 @@ dev = [
 [project.scripts]
 credit-card-recommendation-server = "credit_card_recom_mcp.server:main"
 credit-card-recommendation-http-server = "credit_card_recom_mcp.server:main_http"
+credit-card-recommendation-remote-bridge = "credit_card_recom_mcp.remote_bridge:main"
 
 [build-system]
 requires = ["hatchling"]
