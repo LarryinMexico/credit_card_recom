@@ -44,7 +44,50 @@ The MCP endpoint will be available at:
 http://127.0.0.1:8000/mcp
 ```
 
-## Use A local stdio bridge for remote MCP hosts
+## Cursor Remote Usage
+
+The deployed Render service is available at:
+
+```text
+https://credit-card-recom.onrender.com/mcp
+```
+
+To use this MCP server from Cursor, create `.cursor/mcp.json` in your project
+or update `~/.cursor/mcp.json` with:
+
+```json
+{
+  "mcpServers": {
+    "credit-card-recom": {
+      "url": "https://credit-card-recom.onrender.com/mcp"
+    }
+  }
+}
+```
+
+Then reload Cursor and test in the chat panel with prompts like:
+
+```text
+請使用 recommend_credit_card 工具，merchantName=Amazon、transactionAmount=3000、transactionType=online
+```
+
+```text
+請使用 recommend_credit_card 工具，merchantName=Tokyo Donki、transactionAmount=10000、transactionType=physicalForeign
+```
+
+```text
+請使用 recommend_credit_card 工具，merchantName=Taipei Water、transactionAmount=1000、transactionType=taxAndUtility
+```
+
+Expected results:
+
+- `Amazon / online / 3000` -> `BusinessTitaniumCard`, `30.0`
+- `Tokyo Donki / physicalForeign / 10000` -> `LinePayCard`, `280.0`
+- `Taipei Water / taxAndUtility / 1000` -> `BusinessTitaniumCard`, `3.0`
+
+If the first request is slow, that is usually Render's free-tier cold start.
+
+## Local Bridge For MCP Hosts Without Remote URL Support
 
 Some MCP hosts do not support remote MCP URLs yet and only accept local
 `command` / `args` servers. For those hosts, run the included bridge and point
