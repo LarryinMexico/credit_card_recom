@@ -1,0 +1,54 @@
+{
+  "card_id": "C_CHT",
+  "card_name": "中華電信聯名卡",
+  "card_status": "active",
+  "card_org": null,
+  "annual_fee": "首年免年費。，年費:，鼎極卡不論正、附卡，每卡NT5,000元。，御璽卡正卡每卡NT1,800元；附卡每卡NT900元。，白金卡正卡每卡NT1,500元；附卡每卡NT750元。，相關年費年新增消費、減免辦法及詳細收費方式請參考本行網站(信用卡利率及費用資訊、信用卡產品免年費優惠活動)說明為準。",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_CHT.html",
+  "apply_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/onlinecounter_index/cc_service/cc_service_card_index/cc_service_card_apply.html?CrdTp=A02&Crd=C_CHT&CrdF=8700&Lmt=0&Chnl=&Emp=&Unit=&SPC=&Seed=",
+  "tags": [
+    "行動支付",
+    "國外消費",
+    "訂閱/遊戲",
+    "網路購物"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "指定通路消費最高3%",
+      "source": "cardFeature"
+    },
+    {
+      "text": "代扣中華電信費享2%",
+      "source": "cardFeature"
+    },
+    {
+      "text": "Hami Point 1點=1元 超好用",
+      "source": "cardFeature"
+    },
+    {
+      "text": "Hami Pay掃碼支付最高3%",
+      "source": "specialOffer"
+    },
+    {
+      "text": "漫遊上網85折起",
+      "source": "specialOffer"
+    },
+    {
+      "text": "海外消費線上線下同享2%無上限",
+      "source": "specialOffer"
+    },
+    {
+      "text": "不定期購機優惠",
+      "source": "specialOffer"
+    },
+    {
+      "text": "每千點折百元電信費",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.694761"
+}

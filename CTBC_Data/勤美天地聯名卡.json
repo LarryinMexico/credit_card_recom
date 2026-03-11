@@ -1,0 +1,48 @@
+{
+  "card_id": "C_CMP",
+  "card_name": "勤美天地聯名卡",
+  "card_status": "active",
+  "card_org": "VISA",
+  "annual_fee": "首年免年費",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_CMP.html",
+  "apply_url": null,
+  "tags": [
+    "餐飲美食",
+    "生活量販"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "※本卡已停止申辦",
+      "source": "cardFeature"
+    },
+    {
+      "text": "雙重累積中信紅利點數及勤美會員點數",
+      "source": "cardFeature"
+    },
+    {
+      "text": "館內消費滿NT99元即享免費停車優惠",
+      "source": "cardFeature"
+    },
+    {
+      "text": "信用卡紅利點數及勤美會員積點雙重累積",
+      "source": "specialOffer"
+    },
+    {
+      "text": "館內指定櫃位享5%-10%現折",
+      "source": "specialOffer"
+    },
+    {
+      "text": "生日專屬回饋",
+      "source": "specialOffer"
+    },
+    {
+      "text": "同享晴天卡回饋",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.696655"
+}

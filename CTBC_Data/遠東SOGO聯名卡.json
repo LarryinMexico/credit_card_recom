@@ -1,0 +1,60 @@
+{
+  "card_id": "C_CS",
+  "card_name": "遠東SOGO聯名卡",
+  "card_status": "active",
+  "card_org": "VISA",
+  "annual_fee": "1.首年免年費。，2.年費:，•鼎尊無限卡：不論正、附卡，每卡NT28,000元，持卡期間符合本行指定臻、傳富家資格及SOGO百貨邀約會員免年費。，•無限卡：不論正、附卡，每卡NT5,000元，SOGO百貨邀約會員免年費。，•御璽卡：正卡NT1,800元、附卡NT900元。，3.相關年費年新增消費、減免辦法及詳細收費方式請參考本行網站(信用卡利率及費用資訊、信用卡產品免年費優惠活動)說明為準。",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_CS.html",
+  "apply_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/onlinecounter_index/cc_service/cc_service_card_index/cc_service_card_apply.html?CrdTp=&Crd=C_CS",
+  "tags": [
+    "生活量販",
+    "國外消費"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "店內筆筆3%回饋無上限",
+      "source": "cardFeature"
+    },
+    {
+      "text": "首次申辦享好禮多選一",
+      "source": "cardFeature"
+    },
+    {
+      "text": "店內餐飲最高10%回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "2026/1/1~2026/3/31",
+      "source": "specialOffer"
+    },
+    {
+      "text": "店內消費3%",
+      "source": "specialOffer"
+    },
+    {
+      "text": "回饋無上限",
+      "source": "specialOffer"
+    },
+    {
+      "text": "店內餐飲最高10%",
+      "source": "specialOffer"
+    },
+    {
+      "text": "店內享指定品牌",
+      "source": "specialOffer"
+    },
+    {
+      "text": "9折起、免費停車",
+      "source": "specialOffer"
+    },
+    {
+      "text": "店內消費3%回饋無上限",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.685403"
+}

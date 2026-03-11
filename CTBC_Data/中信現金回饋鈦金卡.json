@@ -1,0 +1,51 @@
+{
+  "card_id": "B_Cashback_Titanium",
+  "card_name": "中信現金回饋鈦金卡",
+  "card_status": "active",
+  "card_org": null,
+  "annual_fee": "首年免年費",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/B_Cashback_Titanium.html",
+  "apply_url": null,
+  "tags": [
+    "不顯示"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "※本卡已停止申辦",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內消費享0.5%回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內月消費滿額，國外消費最高享2.5%回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "回饋金終身有效",
+      "source": "specialOffer"
+    },
+    {
+      "text": "自動折抵次期消費",
+      "source": "specialOffer"
+    },
+    {
+      "text": "一年2次免費國際機場貴賓室服務",
+      "source": "specialOffer"
+    },
+    {
+      "text": "一年2次、每次最高7天國際機場停車服務",
+      "source": "specialOffer"
+    },
+    {
+      "text": "海外最高享2.5%回饋",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.691338"
+}

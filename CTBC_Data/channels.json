@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-06",
+  "channel_categories": {
+    "convenience_store": {
+      "name": "超商",
+      "merchants": ["7-ELEVEN", "全家", "萊爾富", "OK mart"],
+      "synonyms": ["超商", "便利商店", "7-11", "711", "小7", "全家便利商店"]
+    },
+    "supermarket": {
+      "name": "超市／量販",
+      "merchants": ["全聯", "家樂福", "大潤發", "愛買", "COSTCO", "頂好"],
+      "synonyms": ["超市", "量販", "大賣場", "全聯", "家樂福", "好市多", "costco"]
+    },
+    "ecommerce": {
+      "name": "電商",
+      "merchants": ["蝦皮", "momo購物", "PChome", "Yahoo購物中心", "博客來", "friDay購物", "91APP"],
+      "synonyms": ["電商", "網購", "線上購物", "蝦皮", "momo", "pchome", "網路商城"]
+    },
+    "food_delivery": {
+      "name": "外送",
+      "merchants": ["Uber Eats", "foodpanda"],
+      "synonyms": ["外送", "叫外賣", "食物外送", "ubereats", "uber eats", "foodpanda", "熊貓外送"]
+    },
+    "transport": {
+      "name": "交通",
+      "merchants": ["台鐵", "高鐵", "台北捷運", "高雄捷運", "Uber", "計程車", "YouBike", "iRent", "WeMo Scooter"],
+      "synonyms": ["交通", "大眾運輸", "捷運", "火車", "高鐵", "mrt", "uber叫車", "共享機車"]
+    },
+    "dining": {
+      "name": "餐飲",
+      "merchants": ["麥當勞", "肯德基", "摩斯漢堡", "星巴克", "路易莎", "50嵐", "清心"],
+      "synonyms": ["餐廳", "吃飯", "餐飲", "外食", "速食", "咖啡", "飲料", "美食"]
+    },
+    "travel": {
+      "name": "旅遊",
+      "merchants": ["中華航空", "長榮航空", "台灣虎航", "Agoda", "Booking.com", "Klook", "KKday", "易遊網"],
+      "synonyms": ["旅遊", "旅行", "機票", "飯店", "訂房", "出國", "航空", "住宿"]
+    },
+    "entertainment": {
+      "name": "娛樂",
+      "merchants": ["威秀影城", "國賓影城", "好樂迪", "錢櫃", "Netflix", "Spotify"],
+      "synonyms": ["娛樂", "電影", "電影院", "ktv", "卡拉ok", "串流", "影音"]
+    },
+    "gas_station": {
+      "name": "加油站",
+      "merchants": ["中油", "台塑石化", "全國加油站"],
+      "synonyms": ["加油", "加油站", "油站", "中油", "台塑"]
+    },
+    "pharmacy": {
+      "name": "藥妝",
+      "merchants": ["屈臣氏", "康是美", "大樹藥局", "躍獅連鎖藥局"],
+      "synonyms": ["藥妝", "藥局", "藥妝店", "屈臣氏", "康是美"]
+    },
+    "mobile_payment": {
+      "name": "行動支付",
+      "merchants": ["LINE Pay", "街口支付", "台灣 Pay", "Pi 拍錢包", "Apple Pay", "Google Pay", "Samsung Pay"],
+      "synonyms": ["行動支付", "電子支付", "line pay", "linepay", "街口", "台灣pay", "twpay"]
+    },
+    "general": {
+      "name": "一般消費",
+      "merchants": [],
+      "synonyms": ["一般", "一般消費", "其他消費", "國內消費", "海外消費", "所有消費"]
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "card_id": "C_LaLaport",
+  "card_name": "Mitsui Shopping Park LaLaport聯名卡",
+  "card_status": "active",
+  "card_org": "Mastercard",
+  "annual_fee": "1.首年免年費。，2.年費: 正卡NT$1,800，附卡NT$900，3.相關年費年新增消費、減免辦法及詳細收費方式請參考本行網站(信用卡利率及費用資訊、信用卡產品免年費優惠活動)說明為準。",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_LaLaport.html",
+  "apply_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/onlinecounter_index/cc_service/cc_service_card_index/cc_service_card_apply.html?CrdTp=A03&Crd=C_LaLaport&CrdF=8133&Lmt=&Chnl=&Emp=&Unit=&SPC=&Seed=",
+  "tags": [
+    "餐飲美食",
+    "國外消費"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "館內天天享免費停車2小時",
+      "source": "cardFeature"
+    },
+    {
+      "text": "JCB卡享海外訂閱2%優惠",
+      "source": "cardFeature"
+    },
+    {
+      "text": "館內指定品牌最高9折起",
+      "source": "cardFeature"
+    },
+    {
+      "text": "天天免費停車2小時",
+      "source": "specialOffer"
+    },
+    {
+      "text": "館內超市2%/餐廳4%/生日當月全館6%回饋",
+      "source": "specialOffer"
+    },
+    {
+      "text": "館內指定品牌9折起",
+      "source": "specialOffer"
+    },
+    {
+      "text": "JCB卡國外交易免手續費",
+      "source": "specialOffer"
+    },
+    {
+      "text": "天天享館內免費停車2小時",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.684992"
+}

@@ -1,0 +1,55 @@
+{
+  "card_id": "B_Coolplay",
+  "card_name": "酷玩卡",
+  "card_status": "active",
+  "card_org": null,
+  "annual_fee": "首年免年費，年費：正卡NT$1,800，附卡NT$900，每卡種年消費≧NT$60,000享次年免年費(正、附卡如為相同卡面圖樣者，可合併計算其消費金額，如為不同卡面圖樣則應分別計算之)，酷玩卡持卡期間內持續使用數位帳單，即享終身免年費優惠",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/B_Coolplay.html",
+  "apply_url": null,
+  "tags": [
+    "不顯示"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "※本卡已停止申辦",
+      "source": "cardFeature"
+    },
+    {
+      "text": "馬來貘超萌獨家卡面",
+      "source": "cardFeature"
+    },
+    {
+      "text": "紅利回饋最高10倍無上限(含原本5倍)",
+      "source": "cardFeature"
+    },
+    {
+      "text": "馬來貘超萌獨家卡面",
+      "source": "specialOffer"
+    },
+    {
+      "text": "紅利回饋最高10倍無上限",
+      "source": "specialOffer"
+    },
+    {
+      "text": "紅利折抵享電影/餐廳/百貨/旅遊優惠",
+      "source": "specialOffer"
+    },
+    {
+      "text": "預設電子帳單/行動帳單",
+      "source": "specialOffer"
+    },
+    {
+      "text": "終身免年費",
+      "source": "specialOffer"
+    },
+    {
+      "text": "酷玩人生，10倍紅利無限累積",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.697686"
+}

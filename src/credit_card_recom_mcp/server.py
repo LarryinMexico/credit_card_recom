@@ -449,13 +449,13 @@ async def list_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name=TOOL_NAME,
-            description="依照商家、金額與交易型態推薦最佳信用卡。",
+            description="依照商家、金額與交易型態推薦最佳信用卡（適用於已提供結構化欄位的請求）。",
             inputSchema=TOOL_INPUT_SCHEMA,
             outputSchema=TOOL_OUTPUT_SCHEMA,
         ),
         types.Tool(
             name=TOOL_NAME_TEXT,
-            description="從自然語言描述解析消費情境並推薦最佳信用卡。",
+            description="從自然語言描述解析消費情境並推薦最佳信用卡（當使用者以自然語言提問時請呼叫此工具）。",
             inputSchema=TOOL_TEXT_INPUT_SCHEMA,
             outputSchema=TOOL_OUTPUT_SCHEMA,
         ),

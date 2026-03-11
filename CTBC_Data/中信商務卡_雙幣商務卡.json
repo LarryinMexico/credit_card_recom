@@ -1,0 +1,90 @@
+{
+  "card_id": "B_EC",
+  "card_name": "中信商務卡/雙幣商務卡",
+  "card_status": "active",
+  "card_org": "VISA",
+  "annual_fee": "NT4,500元(正附卡分開計算)，不適用中國信託年費計收標準及免收辦法。",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/B_EC.html",
+  "apply_url": null,
+  "tags": [
+    "餐飲美食",
+    "行動支付",
+    "國外消費",
+    "網路購物"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "※中信商務卡已停止申辦，雙幣卡僅接受紙本申辦",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國外實體商店消費享現金回饋2.88%，回饋無上限 (國外非實體消費享1%)",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內消費累積滿額兌換哩程、刷卡金、飯店住宿等好禮",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內消費累積兌換機票",
+      "source": "specialOffer"
+    },
+    {
+      "text": "國外消費享現金回饋最高2.88%",
+      "source": "specialOffer"
+    },
+    {
+      "text": "回饋無上限",
+      "source": "specialOffer"
+    },
+    {
+      "text": "台灣及大陸地區機場接送優惠價",
+      "source": "specialOffer"
+    },
+    {
+      "text": "市區停車享每日2小時",
+      "source": "specialOffer"
+    },
+    {
+      "text": "每月上限10次",
+      "source": "specialOffer"
+    },
+    {
+      "text": "免費華航國內貴賓室",
+      "source": "specialOffer"
+    },
+    {
+      "text": "不限次(須持華航登機證);指定貴賓室一年免費4次",
+      "source": "specialOffer"
+    },
+    {
+      "text": "機場停車每年不限次、每次免費30天",
+      "source": "specialOffer"
+    },
+    {
+      "text": "高額旅遊平安險NT5,000萬元",
+      "source": "specialOffer"
+    },
+    {
+      "text": "龍騰卡貴賓室優惠價",
+      "source": "specialOffer"
+    },
+    {
+      "text": "優惠住房及美饌饗宴",
+      "source": "specialOffer"
+    },
+    {
+      "text": "雙幣結付功能(限雙幣商務卡)",
+      "source": "specialOffer"
+    },
+    {
+      "text": "飛行必備　盡享優惠",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.694122"
+}

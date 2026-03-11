@@ -46,8 +46,12 @@ http://127.0.0.1:8000/mcp
 
 ## External Data (CTBC_Data)
 
-If you want to use the real CTBC dataset, set `CTBC_DATA_DIR` to the folder that
-contains these files:
+This repo includes a full `CTBC_Data/` folder at the project root. The server
+will auto-detect it if `CTBC_DATA_DIR` is not set. Tests use a minimal subset
+under `tests/fixtures/ctbc_data` so they stay fast and deterministic.
+
+If you want to use a custom CTBC dataset location, set `CTBC_DATA_DIR` to the
+folder that contains these files:
 
 - `ctbc_cards.json`
 - `card_features.json`
@@ -112,6 +116,10 @@ If the first request is slow, that is usually Render's free-tier cold start.
 The server also exposes `recommend_credit_card_from_text`, which accepts a
 single field `userMessage` and parses merchant name, amount, and transaction
 type before calling the same recommendation engine.
+
+If your MCP host does not auto-call tools, explicitly ask it to use the tool
+or select the tool from the UI (for example: "請使用 recommend_credit_card_from_text
+工具，userMessage=...").
 
 ## Local Bridge For MCP Hosts Without Remote URL Support
 

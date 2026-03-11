@@ -67,6 +67,10 @@ def get_data_dir() -> Path | None:
     if env_dir:
         path = Path(env_dir)
         return path if path.exists() else None
+    project_root = Path(__file__).resolve().parents[3]
+    repo_data_dir = project_root / "CTBC_Data"
+    if repo_data_dir.exists():
+        return repo_data_dir
     default_path = Path(DEFAULT_DATA_DIR)
     return default_path if default_path.exists() else None
 

@@ -1,0 +1,55 @@
+{
+  "card_id": "C_CCF",
+  "card_name": "家扶認同卡",
+  "card_status": "active",
+  "card_org": "VISA",
+  "annual_fee": "終身免年費優惠-快樂做公益",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_CCF.html",
+  "apply_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/onlinecounter_index/cc_service/cc_service_card_index/cc_service_card_apply.html?CrdTp=A06&Crd=C_CCF&CrdF=8002&Lmt=&Chnl=&Emp=&Unit=&SPC=&Seed=",
+  "tags": [
+    "不顯示"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "快樂做公益 享年費優惠",
+      "source": "cardFeature"
+    },
+    {
+      "text": "一般交易消費公益回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "代扣認養費及定期捐助款",
+      "source": "cardFeature"
+    },
+    {
+      "text": "一般交易消費公益回饋：持卡人可得到百分之0.5的回饋金",
+      "source": "specialOffer"
+    },
+    {
+      "text": "再轉捐家扶兒童關懷基金",
+      "source": "specialOffer"
+    },
+    {
+      "text": "代扣認養費及定期捐助款",
+      "source": "specialOffer"
+    },
+    {
+      "text": "省時、方便又可得到百分之0.5的消費回饋金",
+      "source": "specialOffer"
+    },
+    {
+      "text": "雙重捐款加倍的愛",
+      "source": "specialOffer"
+    },
+    {
+      "text": "0.5%回饋金捐家扶",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.694430"
+}

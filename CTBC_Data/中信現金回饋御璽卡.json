@@ -1,0 +1,51 @@
+{
+  "card_id": "B_Cashback_Signature",
+  "card_name": "中信現金回饋御璽卡",
+  "card_status": "active",
+  "card_org": "VISA",
+  "annual_fee": "首年免年費。",
+  "annual_fee_waiver": null,
+  "card_url": "https://www.ctbcbank.com/content/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/B_Cashback_Signature.html",
+  "apply_url": null,
+  "tags": [
+    "國外消費"
+  ],
+  "notes": null,
+  "data_source": "api",
+  "last_verified": null,
+  "raw_benefits": [
+    {
+      "text": "※本卡已停止申辦",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內消費享0.5%回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "國內月消費滿額，國外消費最高享2.5%回饋",
+      "source": "cardFeature"
+    },
+    {
+      "text": "首年免年費",
+      "source": "cardFeature"
+    },
+    {
+      "text": "VISA每日尊享優惠(影城、五星飯店餐廳、限量機場接送等)",
+      "source": "specialOffer"
+    },
+    {
+      "text": "高額旅行平安險",
+      "source": "specialOffer"
+    },
+    {
+      "text": "道路救援服務",
+      "source": "specialOffer"
+    },
+    {
+      "text": "國外最高享2.5%回饋",
+      "source": "shortIntro"
+    }
+  ],
+  "scraped_at": "2026-03-07T23:39:44.691010"
+}
