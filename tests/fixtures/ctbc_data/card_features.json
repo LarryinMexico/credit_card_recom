@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-07",
+  "source": "fixture",
+  "cards": {
+    "ctbc_c_linepay": {
+      "card_id": "ctbc_c_linepay",
+      "raw_card_id": "C_LINEPay",
+      "page_url": "",
+      "channels": [
+        {
+          "channel_id": "overseas",
+          "cashback_rate": 0.028,
+          "cashback_type": "cash",
+          "cashback_description": "國外實體商店消費最高2.8%回饋",
+          "conditions": "",
+          "valid_end": null,
+          "source": "card_feature_direct"
+        }
+      ]
+    },
+    "ctbc_b_travel_titanium": {
+      "card_id": "ctbc_b_travel_titanium",
+      "raw_card_id": "B_TRAVEL",
+      "page_url": "",
+      "channels": [
+        {
+          "channel_id": "general",
+          "cashback_rate": 0.01,
+          "cashback_type": "cash",
+          "cashback_description": "國內外一般消費回饋1.0%",
+          "conditions": "",
+          "valid_end": null,
+          "source": "card_feature_direct"
+        },
+        {
+          "channel_id": "general",
+          "cashback_rate": 0.025,
+          "cashback_type": "cash",
+          "cashback_description": "國外實體商店消費最高2.5%",
+          "conditions": "",
+          "valid_end": null,
+          "source": "card_feature_direct"
+        }
+      ]
+    }
+  }
+}

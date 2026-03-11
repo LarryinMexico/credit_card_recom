@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-07",
+  "source": "fixture",
+  "cards": {
+    "ctbc_c_linepay": {
+      "card_name": "LINE Pay信用卡",
+      "deals": [
+        {
+          "merchant": "精選飯店/餐廳",
+          "payment_method": "LINE Pay支付",
+          "benefit": "LINE POINTS 5%",
+          "cashback_rate": 0.05,
+          "conditions": "限綁定卡片並使用LINE Pay支付",
+          "valid_start": "2026-01-01",
+          "valid_end": "2026-06-30",
+          "channel_id": "dining",
+          "detail_url": "",
+          "source_page": "fixture"
+        }
+      ]
+    }
+  }
+}

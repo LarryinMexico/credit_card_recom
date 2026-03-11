@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-03-07",
+  "channel_categories": {
+    "dining": {
+      "name": "餐飲",
+      "merchants": ["餐廳", "咖啡店"],
+      "synonyms": ["吃飯", "用餐", "餐廳", "餐飲"]
+    },
+    "ecommerce": {
+      "name": "電商",
+      "merchants": ["Amazon"],
+      "synonyms": ["網購", "線上購物", "電商"]
+    }
+  }
+}

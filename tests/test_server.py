@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from pathlib import Path
 
 import httpx
 import pytest
@@ -12,13 +13,26 @@ from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
 from credit_card_recom_mcp import remote_bridge
+from credit_card_recom_mcp.ctbc_data import get_normalized_data, reset_normalized_cache
 from credit_card_recom_mcp.server import (
     TOOL_INPUT_SCHEMA,
     TOOL_NAME,
+    TOOL_NAME_TEXT,
     create_streamable_http_app,
     get_recommendation_payload,
+    parse_text_request,
     validate_recommendation_arguments,
 )
+
+FIXTURE_DIR = Path(__file__).parent / "fixtures" / "ctbc_data"
+
+
+@pytest.fixture(autouse=True)
+def ctbc_fixture_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CTBC_DATA_DIR", str(FIXTURE_DIR))
+    reset_normalized_cache()
+    yield
+    reset_normalized_cache()
 
 
 def test_validate_recommendation_arguments_rejects_extra_fields() -> None:
@@ -50,8 +64,22 @@ def test_tax_and_utility_forces_business_titanium() -> None:
         )
     )
 
-    assert payload["recommendedCard"] == "BusinessTitaniumCard"
+    assert payload["recommendedCard"] == "中信商旅鈦金卡"
     assert payload["estimatedRewardAmount"] == pytest.approx(3.0)
+
+
+def test_normalized_data_loads_fixture() -> None:
+    data = get_normalized_data()
+    assert data is not None
+    assert "LINE Pay信用卡" in data.cards_by_name
+    assert "LinePayCard" in data.cards_by_alias
+    assert "BusinessTitaniumCard" in data.cards_by_alias
+
+
+def test_parse_text_request_infers_amount_and_type() -> None:
+    parsed = parse_text_request("我在餐廳吃飯刷卡一千元")
+    assert parsed.transaction_amount == 1000
+    assert parsed.transaction_type == "online"
 
 
 @pytest.mark.asyncio
@@ -61,6 +89,7 @@ async def test_mcp_tool_returns_json_string_and_structured_content() -> None:
     server_params = StdioServerParameters(
         command=sys.executable,
         args=["-m", "credit_card_recom_mcp.server"],
+        env={"CTBC_DATA_DIR": str(FIXTURE_DIR)},
     )
 
     async with stdio_client(server_params) as (read_stream, write_stream):
@@ -99,9 +128,30 @@ async def test_mcp_tool_returns_json_string_and_structured_content() -> None:
     assert len(text_blocks) == 1
 
     payload_from_text = json.loads(text_blocks[0].text)
-    assert payload_from_text["recommendedCard"] == "LinePayCard"
+    assert payload_from_text["recommendedCard"] == "LINE Pay信用卡"
     assert payload_from_text["estimatedRewardAmount"] == pytest.approx(280.0)
     assert result.structuredContent == payload_from_text
+
+
+@pytest.mark.asyncio
+async def test_mcp_text_tool_parses_natural_language() -> None:
+    server_params = StdioServerParameters(
+        command=sys.executable,
+        args=["-m", "credit_card_recom_mcp.server"],
+        env={"CTBC_DATA_DIR": str(FIXTURE_DIR)},
+    )
+
+    async with stdio_client(server_params) as (read_stream, write_stream):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            result = await session.call_tool(
+                TOOL_NAME_TEXT,
+                {"userMessage": "我最近在餐廳吃飯要刷卡，消費金額是一千塊，我有LINE Pay信用卡和中信商旅鈦金卡"},
+            )
+
+    text_blocks = [content for content in result.content if isinstance(content, types.TextContent)]
+    payload_from_text = json.loads(text_blocks[0].text)
+    assert payload_from_text["recommendedCard"] == "中信商旅鈦金卡"
 
 
 @pytest.mark.asyncio
@@ -135,7 +185,7 @@ async def test_streamable_http_transport_exposes_same_tool_behavior() -> None:
 
     text_blocks = [content for content in result.content if isinstance(content, types.TextContent)]
     payload_from_text = json.loads(text_blocks[0].text)
-    assert payload_from_text["recommendedCard"] == "BusinessTitaniumCard"
+    assert payload_from_text["recommendedCard"] == "中信商旅鈦金卡"
     assert payload_from_text["estimatedRewardAmount"] == pytest.approx(3.0)
     assert result.structuredContent == payload_from_text
 

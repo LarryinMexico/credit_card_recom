@@ -44,6 +44,26 @@ The MCP endpoint will be available at:
 http://127.0.0.1:8000/mcp
 ```
 
+## External Data (CTBC_Data)
+
+If you want to use the real CTBC dataset, set `CTBC_DATA_DIR` to the folder that
+contains these files:
+
+- `ctbc_cards.json`
+- `card_features.json`
+- `microsite_deals.json`
+- `channels.json`
+
+Example:
+
+```bash
+CTBC_DATA_DIR=/tmp/CTBC_Data \
+env UV_CACHE_DIR=/tmp/uv-cache uv run --python 3.12 credit-card-recommendation-http-server
+```
+
+When the dataset is available, the server automatically switches from the mock
+dictionary to the normalized CTBC rules.
+
 ## Cursor Remote Usage
 
 The deployed Render service is available at:
@@ -86,6 +106,12 @@ Expected results:
 - `Taipei Water / taxAndUtility / 1000` -> `BusinessTitaniumCard`, `3.0`
 
 If the first request is slow, that is usually Render's free-tier cold start.
+
+## Natural Language Tool
+
+The server also exposes `recommend_credit_card_from_text`, which accepts a
+single field `userMessage` and parses merchant name, amount, and transaction
+type before calling the same recommendation engine.
 
 ## Local Bridge For MCP Hosts Without Remote URL Support
 
