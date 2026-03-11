@@ -66,7 +66,8 @@ def get_data_dir() -> Path | None:
     env_dir = os.getenv("CTBC_DATA_DIR", "").strip()
     if env_dir:
         path = Path(env_dir)
-        return path if path.exists() else None
+        if path.exists():
+            return path
     project_root = Path(__file__).resolve().parents[3]
     repo_data_dir = project_root / "CTBC_Data"
     if repo_data_dir.exists():
