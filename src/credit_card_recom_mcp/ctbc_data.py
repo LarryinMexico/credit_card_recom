@@ -58,6 +58,14 @@ class NormalizedData:
     last_updated: str | None
 
 
+@dataclass(frozen=True, slots=True)
+class DataStatus:
+    source: str
+    data_dir: str | None
+    card_count: int
+    last_updated: str | None
+
+
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -328,3 +336,20 @@ def get_normalized_data() -> NormalizedData | None:
 def reset_normalized_cache() -> None:
     global _NORMALIZED_CACHE
     _NORMALIZED_CACHE = None
+
+
+def get_data_status() -> DataStatus:
+    normalized = get_normalized_data()
+    if normalized is None:
+        return DataStatus(
+            source="mock",
+            data_dir=str(get_data_dir()) if get_data_dir() else None,
+            card_count=0,
+            last_updated=None,
+        )
+    return DataStatus(
+        source="ctbc",
+        data_dir=str(get_data_dir()) if get_data_dir() else None,
+        card_count=len(normalized.cards),
+        last_updated=normalized.last_updated,
+    )

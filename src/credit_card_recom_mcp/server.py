@@ -21,6 +21,7 @@ import mcp.types as types
 from credit_card_recom_mcp.ctbc_data import (
     NormalizedCard,
     NormalizedData,
+    get_data_status,
     get_normalized_data,
 )
 from mcp.server.lowlevel import NotificationOptions, Server
@@ -543,12 +544,17 @@ class StreamableHTTPASGIApp:
 async def healthcheck(_: Request) -> JSONResponse:
     """Simple HTTP health endpoint for deployment and smoke testing."""
 
+    data_status = get_data_status()
     return JSONResponse(
         {
             "status": "ok",
             "serverName": SERVER_NAME,
             "serverVersion": SERVER_VERSION,
             "mcpPath": DEFAULT_HTTP_PATH,
+            "dataSource": data_status.source,
+            "dataDir": data_status.data_dir,
+            "cardCount": data_status.card_count,
+            "dataLastUpdated": data_status.last_updated,
         }
     )
 

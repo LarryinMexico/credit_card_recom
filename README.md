@@ -44,6 +44,13 @@ The MCP endpoint will be available at:
 http://127.0.0.1:8000/mcp
 ```
 
+The health response also reports which data source is active:
+
+- `dataSource`: `ctbc` or `mock`
+- `dataDir`: resolved dataset path (if any)
+- `cardCount`: number of cards loaded
+- `dataLastUpdated`: dataset timestamp (if available)
+
 ## External Data (CTBC_Data)
 
 This repo includes a full `CTBC_Data/` folder at the project root. The server
