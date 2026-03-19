@@ -1,0 +1,12 @@
+{
+  "LinePayCard": {
+    "online": 0.005,
+    "physicalForeign": 0.028,
+    "taxAndUtility": 0.0
+  },
+  "BusinessTitaniumCard": {
+    "online": 0.01,
+    "physicalForeign": 0.025,
+    "taxAndUtility": 0.003
+  }
+}

@@ -15,6 +15,7 @@ from mcp.client.streamable_http import streamable_http_client
 from credit_card_recom_mcp import remote_bridge
 from credit_card_recom_mcp.ctbc_data import get_normalized_data, reset_normalized_cache
 from credit_card_recom_mcp.server import (
+    RecommendationRequest,
     TOOL_INPUT_SCHEMA,
     TOOL_NAME,
     TOOL_NAME_TEXT,
@@ -25,6 +26,71 @@ from credit_card_recom_mcp.server import (
 )
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "ctbc_data"
+
+
+def _write_dataset(tmp_path: Path, cards: list[dict[str, object]]) -> Path:
+    data_dir = tmp_path / "ctbc_data"
+    data_dir.mkdir()
+    (data_dir / "ctbc_cards.json").write_text(
+        json.dumps({"last_updated": "2026-03-19", "cards": cards}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (data_dir / "card_features.json").write_text(
+        json.dumps({"cards": {}}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (data_dir / "microsite_deals.json").write_text(
+        json.dumps({"cards": {}}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (data_dir / "channels.json").write_text(
+        json.dumps(
+            {
+                "channel_categories": {
+                    "ecommerce": {"merchants": ["測試商城"], "synonyms": ["網購"]},
+                    "tax_utility": {"merchants": ["中華電信"], "synonyms": ["電信"]},
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return data_dir
+
+
+def _write_multi_bank_dataset(
+    tmp_path: Path,
+    *,
+    ctbc_cards: list[dict[str, object]],
+    fubon_cards: list[dict[str, object]],
+) -> Path:
+    data_dir = tmp_path / "multi_bank_data"
+    data_dir.mkdir()
+    (data_dir / "ctbc_cards.json").write_text(
+        json.dumps(
+            {
+                "version": "1.0",
+                "last_updated": "2026-03-19",
+                "bank": "CTBC",
+                "cards": ctbc_cards,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (data_dir / "fubon_cards.json").write_text(
+        json.dumps(
+            {
+                "version": "1.0",
+                "last_updated": "2026-03-20",
+                "bank": "Fubon",
+                "cards": fubon_cards,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return data_dir
 
 
 @pytest.fixture(autouse=True)
@@ -80,6 +146,477 @@ def test_parse_text_request_infers_amount_and_type() -> None:
     parsed = parse_text_request("我在餐廳吃飯刷卡一千元")
     assert parsed.transaction_amount == 1000
     assert parsed.transaction_type == "online"
+
+
+def test_reward_cap_changes_recommendation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    data_dir = _write_dataset(
+        tmp_path,
+        [
+            {
+                "card_id": "cap_card",
+                "card_name": "高回饋上限卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.05,
+                        "cashback_description": "國內一般消費5%，上限100元",
+                        "max_cashback_per_period": 100,
+                        "min_spend": None,
+                        "conditions": "國內一般消費5%，上限100元",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+            {
+                "card_id": "flat_card",
+                "card_name": "平穩回饋卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.015,
+                        "cashback_description": "國內一般消費1.5%，回饋無上限",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "國內一般消費1.5%，回饋無上限",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name="測試商城",
+            transaction_amount=10000,
+            transaction_type="online",
+        )
+    )
+
+    assert payload["recommendedCard"] == "平穩回饋卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(150.0)
+
+
+def test_tax_and_utility_uses_highest_real_ctbc_reward(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = _write_dataset(
+        tmp_path,
+        [
+            {
+                "card_id": "linepay",
+                "card_name": "LINE Pay信用卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.005,
+                        "cashback_description": "國內一般消費0.5%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "國內一般消費0.5%",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+            {
+                "card_id": "business",
+                "card_name": "中信商旅鈦金卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.003,
+                        "cashback_description": "代扣水電瓦斯電信0.3%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "代扣水電瓦斯電信0.3%",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+            {
+                "card_id": "cht",
+                "card_name": "中華電信聯名卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.02,
+                        "cashback_description": "代扣中華電信費2%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "代扣中華電信費2%",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name="中華電信",
+            transaction_amount=1000,
+            transaction_type="taxAndUtility",
+        )
+    )
+
+    assert payload["recommendedCard"] == "中華電信聯名卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(20.0)
+
+
+def test_min_spend_threshold_blocks_bonus_rule(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = _write_dataset(
+        tmp_path,
+        [
+            {
+                "card_id": "threshold_card",
+                "card_name": "高門檻回饋卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.05,
+                        "cashback_description": "國內一般消費5%",
+                        "max_cashback_per_period": None,
+                        "min_spend": 5000,
+                        "conditions": "國內一般消費5%",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+            {
+                "card_id": "base_card",
+                "card_name": "低門檻回饋卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "國內一般消費1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "國內一般消費1%",
+                        "valid_start": None,
+                        "valid_end": None,
+                    }
+                ],
+            },
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name="測試商城",
+            transaction_amount=3000,
+            transaction_type="online",
+        )
+    )
+
+    assert payload["recommendedCard"] == "低門檻回饋卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(30.0)
+
+
+def test_multi_bank_loader_supports_new_repo_format(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = _write_multi_bank_dataset(
+        tmp_path,
+        ctbc_cards=[
+            {
+                "card_id": "ctbc_linepay",
+                "bank_id": "ctbc",
+                "card_name": "LINE Pay信用卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.005,
+                        "cashback_description": "國內一般消費0.5%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    }
+                ],
+            }
+        ],
+        fubon_cards=[
+            {
+                "card_id": "fubon_j_travel",
+                "bank_id": "fubon",
+                "card_name": "富邦J Travel卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "travel",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.06,
+                        "cashback_description": "旅遊相關消費6%",
+                        "max_cashback_per_period": 1500,
+                        "min_spend": None,
+                        "conditions": "限訂房平台或旅行社消費，每月回饋上限 1,500 元",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": ["Agoda"],
+                    },
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "一般消費1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    },
+                ],
+            }
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    data = get_normalized_data()
+    assert data is not None
+    assert "LINE Pay信用卡" in data.cards_by_name
+    assert "富邦J Travel卡" in data.cards_by_name
+    assert data.cards_by_name["富邦J Travel卡"].bank_id == "fubon"
+    assert data.merchant_index["agoda"] == "travel"
+
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name="Agoda",
+            transaction_amount=20000,
+            transaction_type="online",
+            merchant_channel="travel",
+            allowed_cards=["LINE Pay信用卡", "富邦J Travel卡"],
+        )
+    )
+
+    assert payload["recommendedCard"] == "富邦J Travel卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(1200.0)
+
+
+def test_text_request_prefers_fubon_travel_rule_with_new_channel_inference(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = _write_multi_bank_dataset(
+        tmp_path,
+        ctbc_cards=[
+            {
+                "card_id": "ctbc_travel",
+                "bank_id": "ctbc",
+                "card_name": "中信商旅鈦金卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "國內外一般消費1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    },
+                    {
+                        "channel_id": "overseas_general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.025,
+                        "cashback_description": "國外消費2.5%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    },
+                ],
+            }
+        ],
+        fubon_cards=[
+            {
+                "card_id": "fubon_j_travel",
+                "bank_id": "fubon",
+                "card_name": "富邦J Travel卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "travel",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.06,
+                        "cashback_description": "旅遊相關消費6%",
+                        "max_cashback_per_period": 1500,
+                        "min_spend": None,
+                        "conditions": "限訂房平台或旅行社消費，每月回饋上限 1,500 元",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": ["Agoda", "Booking.com", "訂房網站"],
+                    },
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "一般消費1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    },
+                ],
+            }
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    parsed = parse_text_request("我在 Agoda 訂房 20000 元，我有富邦J Travel卡和中信商旅鈦金卡")
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name=parsed.merchant_name,
+            transaction_amount=parsed.transaction_amount,
+            transaction_type=parsed.transaction_type,
+            merchant_channel=parsed.merchant_channel,
+            allowed_cards=parsed.allowed_cards,
+        )
+    )
+
+    assert parsed.merchant_channel == "travel"
+    assert parsed.transaction_type == "online"
+    assert payload["recommendedCard"] == "富邦J Travel卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(1200.0)
+
+
+def test_text_request_prefers_fubon_costco_online_rule(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = _write_multi_bank_dataset(
+        tmp_path,
+        ctbc_cards=[
+            {
+                "card_id": "ctbc_travel",
+                "bank_id": "ctbc",
+                "card_name": "中信商旅鈦金卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "國內外一般消費1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    }
+                ],
+            }
+        ],
+        fubon_cards=[
+            {
+                "card_id": "fubon_costco",
+                "bank_id": "fubon",
+                "card_name": "富邦Costco聯名卡",
+                "card_status": "active",
+                "channels": [
+                    {
+                        "channel_id": "wholesale",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.02,
+                        "cashback_description": "Costco實體2%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "限 Costco 好市多實體門市消費",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": ["Costco好市多"],
+                    },
+                    {
+                        "channel_id": "ecommerce",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.03,
+                        "cashback_description": "Costco線上3%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "限 Costco 官方網路商店消費",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": ["Costco線上商店"],
+                    },
+                    {
+                        "channel_id": "general",
+                        "cashback_type": "cash",
+                        "cashback_rate": 0.01,
+                        "cashback_description": "一般1%",
+                        "max_cashback_per_period": None,
+                        "min_spend": None,
+                        "conditions": "",
+                        "valid_start": None,
+                        "valid_end": None,
+                        "merchants": [],
+                    },
+                ],
+            }
+        ],
+    )
+    monkeypatch.setenv("CTBC_DATA_DIR", str(data_dir))
+    reset_normalized_cache()
+
+    parsed = parse_text_request("我在 Costco 線上商店買 10000 元，我有富邦Costco聯名卡和中信商旅鈦金卡")
+    payload = get_recommendation_payload(
+        RecommendationRequest(
+            merchant_name=parsed.merchant_name,
+            transaction_amount=parsed.transaction_amount,
+            transaction_type=parsed.transaction_type,
+            merchant_channel=parsed.merchant_channel,
+            allowed_cards=parsed.allowed_cards,
+        )
+    )
+
+    assert parsed.merchant_channel == "ecommerce"
+    assert payload["recommendedCard"] == "富邦Costco聯名卡"
+    assert payload["estimatedRewardAmount"] == pytest.approx(300.0)
 
 
 @pytest.mark.asyncio

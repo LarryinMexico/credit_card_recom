@@ -21,8 +21,10 @@ import mcp.types as types
 from credit_card_recom_mcp.ctbc_data import (
     NormalizedCard,
     NormalizedData,
+    RewardRule,
     get_data_status,
     get_normalized_data,
+    is_rule_active,
 )
 from mcp.server.lowlevel import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
@@ -41,6 +43,15 @@ MONEY_PRECISION = Decimal("0.01")
 DEFAULT_HTTP_HOST = "127.0.0.1"
 DEFAULT_HTTP_PORT = 8000
 DEFAULT_HTTP_PATH = "/mcp"
+CHANNEL_KEYWORD_HINTS: dict[str, tuple[str, ...]] = {
+    "travel": ("agoda", "booking", "trip.com", "hotel", "飯店", "旅館", "住宿", "訂房", "機票", "航空", "旅行社"),
+    "wholesale": ("costco", "好市多"),
+    "ecommerce": ("momo", "蝦皮", "pchome", "yahoo購物", "購物網", "網購", "電商"),
+    "food_delivery": ("foodpanda", "uber eats", "ubereats", "外送"),
+    "dining": ("星巴克", "咖啡", "餐廳", "吃飯", "麥當勞", "肯德基"),
+    "insurance": ("保費", "保險"),
+    "telecom": ("電信", "台灣大哥大", "台哥大", "台灣之星", "myvideo", "中華電信"),
+}
 
 # In-memory mock database. Rates are stored as Decimal-friendly strings to keep
 # the reward calculation deterministic and easy to audit.
@@ -135,6 +146,13 @@ class ParsedTextRequest:
     inferred_fields: list[str]
 
 
+@dataclass(frozen=True, slots=True)
+class AppliedReward:
+    amount: Decimal
+    rule: RewardRule | None
+    notes: tuple[str, ...] = ()
+
+
 def validate_recommendation_arguments(arguments: Mapping[str, Any] | None) -> RecommendationRequest:
     """Validate raw MCP tool arguments against the strict business contract.
 
@@ -189,17 +207,79 @@ def calculate_reward(transaction_amount: int, reward_rate: Decimal) -> Decimal:
     return raw_reward.quantize(MONEY_PRECISION, rounding=ROUND_HALF_UP)
 
 
+def _evaluate_reward_rule(
+    transaction_amount: int,
+    rule: RewardRule,
+) -> AppliedReward | None:
+    if not is_rule_active(rule):
+        return None
+
+    notes: list[str] = []
+    amount = Decimal(transaction_amount)
+    if rule.min_spend_amount is not None and amount < rule.min_spend_amount:
+        return None
+    if rule.min_spend_amount is not None:
+        notes.append(f"已套用最低消費門檻 {rule.min_spend_amount:.0f}")
+
+    eligible_amount = amount
+    if rule.spend_cap_amount is not None and eligible_amount > rule.spend_cap_amount:
+        eligible_amount = rule.spend_cap_amount
+        notes.append(f"已套用可計回饋消費上限 {rule.spend_cap_amount:.0f}")
+
+    reward = calculate_reward(int(eligible_amount), rule.rate)
+    if rule.reward_cap_amount is not None and reward > rule.reward_cap_amount:
+        reward = rule.reward_cap_amount.quantize(MONEY_PRECISION)
+        notes.append(f"已套用回饋上限 {rule.reward_cap_amount:.0f}")
+
+    return AppliedReward(amount=reward, rule=rule, notes=tuple(notes))
+
+
+def _select_best_rule_reward(
+    request: RecommendationRequest,
+    card: NormalizedCard,
+) -> AppliedReward:
+    candidates: list[RewardRule] = list(card.base_rules.get(request.transaction_type, []))
+    if request.merchant_channel:
+        candidates.extend(card.channel_rules.get(request.merchant_channel, []))
+
+    best_result: AppliedReward | None = None
+    for rule in candidates:
+        evaluated = _evaluate_reward_rule(request.transaction_amount, rule)
+        if evaluated is None:
+            continue
+        if best_result is None or evaluated.amount > best_result.amount:
+            best_result = evaluated
+
+    if best_result is not None:
+        return best_result
+
+    if candidates:
+        return AppliedReward(amount=Decimal("0.00"), rule=None)
+
+    fallback_rate = card.base_rates.get(request.transaction_type, Decimal("0.0"))
+    return AppliedReward(
+        amount=calculate_reward(request.transaction_amount, fallback_rate),
+        rule=None,
+    )
+
+
 def build_reasoning(
     request: RecommendationRequest,
     recommended_card: str,
     reward_by_card: Mapping[str, Decimal],
+    notes_by_card: Mapping[str, tuple[str, ...]] | None = None,
 ) -> str:
     """Produce a human-readable explanation for the final recommendation."""
 
     if request.transaction_type == "taxAndUtility":
         linepay_reward = reward_by_card.get("LinePayCard")
         business_reward = reward_by_card.get("BusinessTitaniumCard")
-        if linepay_reward is not None and business_reward is not None:
+        if (
+            recommended_card == "BusinessTitaniumCard"
+            and linepay_reward is not None
+            and business_reward is not None
+            and len(reward_by_card) <= 2
+        ):
             return (
                 f"{request.merchant_name} 屬於 taxAndUtility 類型，LinePayCard 依規則不提供回饋，"
                 f"因此系統強制推薦 BusinessTitaniumCard；預估回饋為 "
@@ -217,15 +297,21 @@ def build_reasoning(
     )
 
     if request.transaction_type == "physicalForeign":
-        return (
+        reasoning = (
             f"{request.merchant_name} 為國外實體消費，已套用國外實體回饋率精算。"
             f"{comparison_text}。因此推薦 {recommended_card}。"
         )
+        if notes_by_card and notes_by_card.get(recommended_card):
+            return f"{reasoning}（{'；'.join(notes_by_card[recommended_card])}）"
+        return reasoning
 
-    return (
+    reasoning = (
         f"{request.merchant_name} 為一般線上消費，依各卡國內一般消費回饋率計算。"
         f"{comparison_text}。因此推薦 {recommended_card}。"
     )
+    if notes_by_card and notes_by_card.get(recommended_card):
+        return f"{reasoning}（{'；'.join(notes_by_card[recommended_card])}）"
+    return reasoning
 
 
 def get_recommendation_payload(request: RecommendationRequest) -> dict[str, Any]:
@@ -290,22 +376,14 @@ def _get_payload_from_normalized_data(
     cards = _filter_cards(normalized_data, request.allowed_cards)
 
     reward_by_card: dict[str, Decimal] = {}
+    notes_by_card: dict[str, tuple[str, ...]] = {}
     for card in cards:
-        rate = card.base_rates.get(request.transaction_type, Decimal("0.0"))
-        if request.transaction_type == "online" and request.merchant_channel:
-            channel_rate = card.channel_rates.get(request.merchant_channel)
-            if channel_rate is not None and channel_rate > rate:
-                rate = channel_rate
-        reward_by_card[card.card_name] = calculate_reward(request.transaction_amount, rate)
+        applied_reward = _select_best_rule_reward(request, card)
+        reward_by_card[card.card_name] = applied_reward.amount
+        notes_by_card[card.card_name] = applied_reward.notes
 
     if request.transaction_type == "taxAndUtility":
-        business_card = normalized_data.cards_by_alias.get("BusinessTitaniumCard")
-        if business_card and (
-            not request.allowed_cards or business_card.card_name in request.allowed_cards
-        ):
-            recommended_card = business_card.card_name
-        else:
-            recommended_card = max(reward_by_card, key=reward_by_card.get)
+        recommended_card = max(reward_by_card, key=reward_by_card.get)
     else:
         recommended_card = max(reward_by_card, key=reward_by_card.get)
 
@@ -313,6 +391,7 @@ def _get_payload_from_normalized_data(
         request=request,
         recommended_card=recommended_card,
         reward_by_card=reward_by_card,
+        notes_by_card=notes_by_card,
     )
 
     return {
@@ -367,7 +446,10 @@ def _parse_chinese_amount(text: str) -> int | None:
 
 def _infer_transaction_type(text: str, merchant_channel: str | None) -> tuple[str, list[str]]:
     inferred: list[str] = []
-    if any(token in text for token in ("水電", "瓦斯", "電信", "稅", "保費", "代扣", "學雜費", "公用事業")):
+    if any(token in text for token in ("保費", "保險")) or merchant_channel == "insurance":
+        inferred.append("transactionType")
+        return "online", inferred
+    if any(token in text for token in ("水電", "瓦斯", "電信", "稅", "代扣", "學雜費", "公用事業")):
         inferred.append("transactionType")
         return "taxAndUtility", inferred
     if any(token in text for token in ("國外", "海外", "出國", "日本", "美國", "境外")):
@@ -382,13 +464,16 @@ def _infer_transaction_type(text: str, merchant_channel: str | None) -> tuple[st
     return "online", inferred
 
 
-def _infer_merchant_channel(merchant: str, normalized_data: NormalizedData | None) -> str | None:
+def _infer_merchant_channel(text: str, normalized_data: NormalizedData | None) -> str | None:
     if normalized_data is None:
         return None
     lookup = normalized_data.merchant_index
-    merchant_lower = merchant.lower().replace(" ", "")
+    merchant_lower = text.lower().replace(" ", "")
     for key, channel_id in lookup.items():
         if key.replace(" ", "") in merchant_lower:
+            return channel_id
+    for channel_id, keywords in CHANNEL_KEYWORD_HINTS.items():
+        if any(keyword.replace(" ", "") in merchant_lower for keyword in keywords):
             return channel_id
     return None
 
@@ -427,7 +512,7 @@ def parse_text_request(user_message: str) -> ParsedTextRequest:
     amount = _extract_amount(user_message)
     if amount is None:
         raise ValueError("無法從描述中解析消費金額，請補充金額。")
-    merchant_channel = _infer_merchant_channel(merchant, normalized_data)
+    merchant_channel = _infer_merchant_channel(user_message, normalized_data)
     transaction_type, inferred = _infer_transaction_type(user_message, merchant_channel)
     allowed_cards = _extract_allowed_cards(user_message, normalized_data)
     return ParsedTextRequest(
